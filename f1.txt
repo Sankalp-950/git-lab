@@ -1,0 +1,127 @@
+MASTER :
+ 
+1  cd /home/ubuntu
+    2  sshkeygen
+    3  ssh-keygen
+    4  cd /root/.ssh
+    5  ls
+    6  cat id_rsa.pub
+    7  cat id_rsa
+    8  cd /
+    9  cd /root/.ssh
+   10  chmod 600 id_rsa.pub
+   11  cd /
+   12  cat /var/lib/jenkins/secrets/initialAdminPassword
+   13  ls
+   14  cd /
+   15  sudo su
+   16  sudo update
+   17  sudo apt update
+   18  ls
+   19  apt install openjdk-21-jdk
+   20  ls
+   21  java -version
+   22  sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc   https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+   23  echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]"   https://pkg.jenkins.io/debian-stable binary/ | sudo tee   /etc/apt/sources.list.d/jenkins.list > /dev/null
+   24  sudo apt update
+   25  sudo apt install jenkins
+   26  su - jenkins
+   27  sudo usermod -aG sudo jenkins
+   28  sudo visudo
+   29  su - jenkins
+   30  ls
+   31  cd /home/ubuntu
+   32  ls
+   33  cd eb-tomcat-snakes.old
+   34  ls
+   35  git config --global --add safe.directory /home/ubuntu/eb-tomcat-snakes.old
+   36  git push github master
+   37  cd /
+   38  cat /var/lib/jenkins/secrets/initialAdminPassword
+   39  ls
+   40  ls
+   41  sudo su
+   42  cd /root/.ssh
+   43  ls
+   44  chmod 600 id_rsa.pub
+   45  cd /
+   46  ls
+   47  sudo su
+   48  ssh-keygen -t rsa -b 4096
+   49  clear
+   50  cd /root/.ssh
+   51  cat id_rsa.pub
+   52  cat id_rsa
+   53  ls
+   54  cat /var/lib/jenkins/secrets/initialAdminPassword
+   55  mkdir efs
+   56  sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport 124.90.0.140:/ efs
+   57  apt -y install nfs-common
+   58  su - jenkins
+   59  su - jenkins
+   60  su - jekins
+   61  su - jenkins
+   62  ls
+   63  sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport 124.90.0.140:/ efs
+   64  ls
+   65  sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport 124.90.0.140:/ efs
+ 
+
+
+
+
+PIPELINE CODE:
+pipeline {
+    agent { label 'default' }
+ 
+    stages {
+ 
+        stage('Checkout Code') {
+            steps {
+                echo "Checking out source code"
+                git 'https://github.com/pratikdhameltm/jenkinssnake'
+                sh 'sudo chown jenkins:jenkins /var/lib/jenkins/efs'
+                sh 'sudo cp -r * /var/lib/jenkins/efs'
+                sh 'sudo chown jenkins:jenkins /var/lib/jenkins/efs/*'
+            }
+        }
+ 
+        stage('Build Application') {
+            agent { label 'build' }
+ 
+            steps {
+ 
+                sh '''
+                    sudo chown jenkins:jenkins /home/jenkins/build
+                    sudo chmod 777 /home/jenkins/build
+                    cd /home/jenkins/build
+                    sudo chown jenkins:jenkins /home/jenkins/build/*
+                    rm -rf ROOt.war
+                    sudo apt install -y openjdk-8-jdk
+                    ./build.sh
+                    ls -al
+                '''
+            }
+        }
+ 
+        stage('DEPLOY TO TOMCAT') {
+            agent { label 'deploy' }
+            steps {
+                sh '''
+                    sudo chown jenkins:jenkins /home/jenkins/deploy
+                    sudo chmod 777 /home/jenkins/deploy
+                    cd /home/jenkins/deploy
+                    ls -al
+                    sudo chown jenkins:jenkins /home/jenkins/deploy/*
+                    sudo apt install -y openjdk-11-jdk
+                    sudo apt install -y tomcat9 tomcat9-admin
+                    sudo rm -rf /var/lib/tomcat9/webapps/*
+                    sudo cp ROOT.war /var/lib/tomcat9/webapps
+                '''
+            }
+        }
+ 
+ 
+    }
+ 
+}
